@@ -1,0 +1,116 @@
+# ### Signup
+# POST http://localhost:5000/api/auth/signup
+# Content-Type: application/json
+
+# {
+#   "name": "Abhishek Kandera",
+#   "email": "abhi@gmail.com",
+#   "password": "12345",
+#   "mobile": "9876543210"
+# }
+
+### Login
+# POST http://localhost:5000/api/auth/login
+# Content-Type: application/json
+
+# {
+#   "email": "abhi@gmail.com",
+#   "password": "12345"
+# }
+
+### Protected Route
+# GET http://localhost:5000/api/protected
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MGYyMjY1NDdmNWYxMTEyZjkxNDA3OCIsImlhdCI6MTc2MjYwMjQxMywiZXhwIjoxNzYyNjg4ODEzfQ.KlxBEbBBvDSJiUbN4HB18a884HQkDvIdvV7CJzN9GFs
+
+### Add Station (POST)
+# POST http://localhost:5000/api/stations
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MGYyMjY1NDdmNWYxMTEyZjkxNDA3OCIsImlhdCI6MTc2MjYwMjQxMywiZXhwIjoxNzYyNjg4ODEzfQ.KlxBEbBBvDSJiUbN4HB18a884HQkDvIdvV7CJzN9GFs
+# Content-Type: application/json
+
+# {
+#   "name": "ChargeUp EV Station - Indiranagar",
+#   "address": "100 Feet Road, Indiranagar, Bengaluru",
+#   "latitude": 12.9716,
+#   "longitude": 77.6413,
+#   "connectorTypes": ["Type2", "CCS2"],
+#   "availablePorts": 4,
+#   "pricing": "₹25/kWh",
+#   "openHours": "6 AM - 11 PM"
+# }
+
+# POST http://localhost:5000/api/stations
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MGYyMjY1NDdmNWYxMTEyZjkxNDA3OCIsImlhdCI6MTc2MjYwMjQxMywiZXhwIjoxNzYyNjg4ODEzfQ.KlxBEbBBvDSJiUbN4HB18a884HQkDvIdvV7CJzN9GFs
+# Content-Type: application/json
+
+# {
+#   "name": "ChargeUp EV Station - Connaught Place",
+#   "address": "Block A, Connaught Place, New Delhi",
+#   "latitude": 28.6315,
+#   "longitude": 77.2167,
+#   "connectorTypes": ["CCS2", "Type2"],
+#   "availablePorts": 6,
+#   "pricing": "₹25/kWh",
+#   "openHours": "24x7"
+# }
+
+# POST http://localhost:5000/api/stations
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MGYyMjY1NDdmNWYxMTEyZjkxNDA3OCIsImlhdCI6MTc2MjYwMjQxMywiZXhwIjoxNzYyNjg4ODEzfQ.KlxBEbBBvDSJiUbN4HB18a884HQkDvIdvV7CJzN9GFs
+# Content-Type: application/json
+
+# {
+#   "name": "Tata Power EZ Charge - South Extension",
+#   "address": "E Block, South Extension II, New Delhi",
+#   "latitude": 28.5699,
+#   "longitude": 77.2279,
+#   "connectorTypes": ["CCS2", "CHAdeMO"],
+#   "availablePorts": 4,
+#   "pricing": "₹28/kWh",
+#   "openHours": "6 AM - 11 PM"
+# }
+
+# POST http://localhost:5000/api/stations
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MGYyMjY1NDdmNWYxMTEyZjkxNDA3OCIsImlhdCI6MTc2MjYwMjQxMywiZXhwIjoxNzYyNjg4ODEzfQ.KlxBEbBBvDSJiUbN4HB18a884HQkDvIdvV7CJzN9GFs
+# Content-Type: application/json
+
+# {
+#   "name": "Ather Grid - Select Citywalk Saket",
+#   "address": "Select Citywalk Mall, Saket, New Delhi",
+#   "latitude": 28.5284,
+#   "longitude": 77.2195,
+#   "connectorTypes": ["Ather Grid", "Type2"],
+#   "availablePorts": 3,
+#   "pricing": "Free for Ather owners",
+#   "openHours": "7 AM - 10 PM"
+# }
+
+# POST http://localhost:5000/api/stations
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MGYyMjY1NDdmNWYxMTEyZjkxNDA3OCIsImlhdCI6MTc2MjYwMjQxMywiZXhwIjoxNzYyNjg4ODEzfQ.KlxBEbBBvDSJiUbN4HB18a884HQkDvIdvV7CJzN9GFs
+# Content-Type: application/json
+
+# {
+#   "name": "Zeon Charging Station - Dwarka Sector 12",
+#   "address": "Plot 23, Sector 12, Dwarka, New Delhi",
+#   "latitude": 28.5921,
+#   "longitude": 77.0460,
+#   "connectorTypes": ["CCS2", "Type2"],
+#   "availablePorts": 5,
+#   "pricing": "₹22/kWh",
+#   "openHours": "24x7"
+# }
+
+# POST http://localhost:5000/api/stations
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MGYyMjY1NDdmNWYxMTEyZjkxNDA3OCIsImlhdCI6MTc2MjYwMjQxMywiZXhwIjoxNzYyNjg4ODEzfQ.KlxBEbBBvDSJiUbN4HB18a884HQkDvIdvV7CJzN9GFs
+# Content-Type: application/json
+
+# {
+#   "name": "Fortum Charge & Drive - Lajpat Nagar",
+#   "address": "Ring Road, Lajpat Nagar II, New Delhi",
+#   "latitude": 28.5685,
+#   "longitude": 77.2431,
+#   "connectorTypes": ["CCS2", "Type2"],
+#   "availablePorts": 7,
+#   "pricing": "₹27/kWh",
+#   "openHours": "5 AM - 11 PM"
+# }
+
+GET http://localhost:5000/api/stations
