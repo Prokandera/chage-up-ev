@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "@/config"; // ✅ centralized backend URL
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -75,8 +76,9 @@ export function BookingModal({
   // ✅ Handle booking API call
   const handleNext = async () => {
     if (step === 3) {
-      // 🔐 Check if user is logged in
       const token = localStorage.getItem("token");
+
+      // 🔐 Check if user is logged in
       if (!user || !token) {
         toast.error("Please sign in to complete booking");
         navigate("/auth?mode=login");
@@ -103,7 +105,8 @@ export function BookingModal({
           totalAmount: calculatePrice(),
         };
 
-        const response = await fetch("https://chage-up-ev.onrender.com", {
+        // ✅ Use correct endpoint
+        const response = await fetch(`${API_BASE_URL}/bookings`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -114,7 +117,6 @@ export function BookingModal({
 
         const data = await response.json();
 
-        // 🚨 If backend returns error
         if (!response.ok) {
           console.error("❌ Booking Error:", data);
           throw new Error(data.error || "Failed to create booking");
@@ -134,9 +136,7 @@ export function BookingModal({
     }
   };
 
-  const handleBack = () => {
-    if (step > 1) setStep(step - 1);
-  };
+  const handleBack = () => step > 1 && setStep(step - 1);
 
   const handleClose = () => {
     setDate(new Date());
