@@ -103,7 +103,7 @@ export function BookingModal({
           totalAmount: calculatePrice(),
         };
 
-        const response = await fetch("http://localhost:5000/api/bookings", {
+        const response = await fetch("https://chage-up-ev.onrender.com", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

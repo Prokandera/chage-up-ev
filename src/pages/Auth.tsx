@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { API_BASE_URL } from "@/config"; // ✅ centralized API base
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { login } = useAuth(); // ✅ from AuthContext
+  const { login } = useAuth();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -28,8 +29,8 @@ const Auth = () => {
 
     try {
       const endpoint = isLogin
-        ? "http://localhost:5000/api/auth/login"
-        : "http://localhost:5000/api/auth/signup";
+        ? `${API_BASE_URL}/auth/login`
+        : `${API_BASE_URL}/auth/signup`;
 
       const response = await fetch(endpoint, {
         method: "POST",
@@ -41,8 +42,7 @@ const Auth = () => {
       if (!response.ok) throw new Error(data.message || "Authentication failed");
 
       if (isLogin) {
-        // ✅ Save user and token using AuthContext
-        login(data.user, data.token);
+        login(data.user, data.token); // ✅ AuthContext saves session
         toast.success("Successfully logged in!");
         navigate("/");
       } else {
@@ -58,7 +58,7 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-green-50 to-indigo-50 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Animated doodles background */}
+      {/* Animated background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-32 h-32 bg-ev-blue/10 rounded-full animate-float" />
         <div className="absolute top-40 right-20 w-24 h-24 bg-ev-green/10 rounded-full animate-float-delayed" />
@@ -69,19 +69,8 @@ const Auth = () => {
       <div className="max-w-md w-full space-y-8 relative z-10 animate-slide-in-bottom">
         <div className="text-center">
           <div className="inline-flex items-center justify-center w-20 h-20 mb-4 bg-gradient-to-r from-ev-blue to-ev-green rounded-full shadow-lg animate-scale-in">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2}
-              stroke="currentColor"
-              className="w-10 h-10 text-white"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"
-              />
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-10 h-10 text-white">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
             </svg>
           </div>
           <h2 className="text-4xl font-extrabold bg-gradient-to-r from-ev-blue via-ev-green to-ev-indigo bg-clip-text text-transparent animate-fade-in">
@@ -178,4 +167,3 @@ const Auth = () => {
 };
 
 export default Auth;
-
