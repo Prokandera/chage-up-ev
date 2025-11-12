@@ -11,21 +11,14 @@ const app = express();
 
 // ✅ Proper CORS setup for Render + Vercel
 const allowedOrigins = [
-    "https://chage-up-ev.vercel.app", // your deployed frontend
-    "http://localhost:5173", // local dev
+    "https://chage-up-ev.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:3000",
 ];
 
 app.use(
     cors({
-        origin: function(origin, callback) {
-            if (!origin) return callback(null, true);
-            if (allowedOrigins.includes(origin)) {
-                return callback(null, true);
-            } else {
-                console.log("❌ Blocked by CORS:", origin);
-                return callback(new Error("Not allowed by CORS"));
-            }
-        },
+        origin: allowedOrigins,
         credentials: true,
         methods: ["GET", "POST", "PUT", "DELETE"],
         allowedHeaders: ["Content-Type", "Authorization"],
