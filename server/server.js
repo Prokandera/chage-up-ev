@@ -20,13 +20,14 @@ const allowedOrigins = [
     "http://localhost:3000", // react dev
 ];
 
-// manual headers FIRST (before cors middleware)
+const isVercelPreview = (origin) =>
+    origin && origin.endsWith(".vercel.app");
+
 app.use((req, res, next) => {
     const origin = req.headers.origin;
-    if (allowedOrigins.includes(origin)) {
+
+    if (allowedOrigins.includes(origin) || isVercelPreview(origin)) {
         res.header("Access-Control-Allow-Origin", origin);
-    } else {
-        res.header("Access-Control-Allow-Origin", "https://chage-up-ev.vercel.app");
     }
 
     res.header("Access-Control-Allow-Credentials", "true");
@@ -39,21 +40,9 @@ app.use((req, res, next) => {
         "GET, POST, PUT, DELETE, OPTIONS"
     );
 
-    if (req.method === "OPTIONS") {
-        return res.sendStatus(204);
-    }
+    if (req.method === "OPTIONS") return res.sendStatus(204);
     next();
 });
-
-// secondary safety — use cors with exact origin
-app.use(
-    cors({
-        origin: allowedOrigins,
-        credentials: true,
-        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
-    })
-);
 
 // parse json
 app.use(express.json());
