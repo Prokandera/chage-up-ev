@@ -23,17 +23,17 @@ const allowedOrigins = [
 app.use(
     cors({
         origin: function(origin, callback) {
-            if (!origin) return callback(null, true);
+            if (!origin) return callback(null, true); // allow Postman / curl
             if (allowedOrigins.includes(origin)) {
                 return callback(null, true);
             } else {
-                console.log("❌ Blocked by CORS:", origin);
+                console.log("❌ CORS Blocked Origin:", origin);
                 return callback(new Error("Not allowed by CORS"));
             }
         },
-        credentials: true,
         methods: ["GET", "POST", "PUT", "DELETE"],
         allowedHeaders: ["Content-Type", "Authorization"],
+        credentials: true,
     })
 );
 
