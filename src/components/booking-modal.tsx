@@ -66,72 +66,70 @@ export function BookingModal({
   const calculatePrice = () =>
     selectedConnector ? connectorPricing[selectedConnector] || 80 : 0;
 
-  const handleNext = async () => {
+const handleNext = async () => {
+  if (step === 1 && !date) return toast.error("Please select a date.");
+  if (step === 2 && !selectedConnector)
+    return toast.error("Please select a connector type.");
+  if (step === 3 && selectedSlot === null)
+    return toast.error("Please select a time slot.");
 
-    if (step === 1 && !date) return toast.error("Please select a date.");
-    if (step === 2 && !selectedConnector)
-      return toast.error("Please select a connector type.");
-    if (step === 3 && selectedSlot === null)
-      return toast.error("Please select a time slot.");
+  if (step === 3) {
+    const token = localStorage.getItem("token");
 
-    if (step === 3) {
-      const token = localStorage.getItem("token");
-      if (!token || !user) {
-        toast.error("Please sign in to complete booking");
-        navigate("/auth?mode=login");
-        handleClose();
-        return;
-      }
-
-      const finalDate = date?.toISOString().split("T")[0] || "";
-      const slotText =
-        timeSlots.find((s) => s.id === selectedSlot)?.time || "";
-
-      const bookingData = {
-        stationId,              // ✅ fixed
-        stationName,
-        connectorType: selectedConnector,
-        bookingDate: finalDate,
-        timeSlot: slotText,     // ✅ fixed
-        totalAmount: calculatePrice(),
-      };
-
-      console.log("📦 FINAL BOOKING PAYLOAD SENT TO BACKEND:", bookingData);
-
-      // Backend-required validation
-      if (!stationId || !stationName || !selectedConnector || !finalDate || !slotText) {
-        toast.error("Missing required booking fields.");
-        return;
-      }
-
-      try {
-        setLoading(true);
-
-        const response = await fetch(`${API_BASE_URL}/bookings`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(bookingData),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) throw new Error(data.error || "Booking failed");
-
-        setBookingComplete(true);
-        toast.success("Booking confirmed!");
-      } catch (err: any) {
-        console.error("❌ Booking Error:", err);
-        toast.error(err.message || "Failed to create booking");
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      setStep((p) => p + 1);
+    if (!token || !user) {
+      toast.error("Please sign in to complete booking");
+      navigate("/auth?mode=login");
+      handleClose();
+      return;
     }
-  };
+
+    const finalDate = date?.toISOString().split("T")[0] || "";
+    const slotObj = timeSlots.find((s) => s.id === selectedSlot);
+    const slotText = slotObj ? slotObj.time : ""; // <-- FIXED
+
+    const bookingData = {
+      stationId,
+      stationName,
+      connectorType: selectedConnector,
+      bookingDate: finalDate,
+      timeSlot: slotText,    // <-- FIXED (guaranteed to exist)
+      totalAmount: calculatePrice(),
+    };
+
+    console.log("📦 FINAL BOOKING PAYLOAD:", bookingData);
+
+    if (!stationId || !stationName || !selectedConnector || !finalDate || !slotText) {
+      toast.error("Missing required booking fields.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const response = await fetch(`${API_BASE_URL}/bookings`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(bookingData),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Booking failed");
+
+      setBookingComplete(true);
+      toast.success("Booking confirmed!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to create booking");
+    } finally {
+      setLoading(false);
+    }
+  } else {
+    setStep((p) => p + 1);
+  }
+};
+
 
   const handleClose = () => {
     setDate(new Date());

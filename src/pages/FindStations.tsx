@@ -205,9 +205,9 @@ const FindStations = () => {
         <BookingModal
           isOpen={isBookingModalOpen}
           onClose={() => setIsBookingModalOpen(false)}
-          stationId={selectedStation._id} // ✅ Added
+          stationId={selectedStation._id}              // REQUIRED
           stationName={selectedStation.name}
-          connectorTypes={selectedStation.connectorTypes || ["Type 2", "CCS2", "CHAdeMO"]}
+          connectorTypes={selectedStation.connectorTypes}
         />
       )}
     </div>
