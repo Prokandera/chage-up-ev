@@ -68,32 +68,27 @@ export function BookingModal({
   };
 
   const handleNext = async () => {
-    // ✅ Ensure each step has valid input
-    if (step === 1 && !date) {
-      toast.error("Please select a date");
-      return;
-    }
-    if (step === 2 && !selectedConnector) {
-      toast.error("Please select a connector type");
-      return;
-    }
-    if (step === 3 && selectedSlot === null) {
-      toast.error("Please select a time slot");
-      return;
-    }
+    // 🛑 Step validation
+    if (step === 1 && !date) return toast.error("Please select a date.");
+    if (step === 2 && !selectedConnector)
+      return toast.error("Please select a connector type.");
+    if (step === 3 && selectedSlot === null)
+      return toast.error("Please select a time slot.");
 
-    // ✅ If final step, make booking request
+    // 🟢 Final step — Send booking request
     if (step === 3) {
       const token = localStorage.getItem("token");
+
       if (!user || !token) {
-        toast.error("Please sign in to complete booking");
+        toast.error("Please sign in to complete booking.");
         navigate("/auth?mode=login");
         handleClose();
         return;
       }
 
       const bookingDate = date?.toISOString().split("T")[0] || "";
-      const timeSlot = timeSlots.find((slot) => slot.id === selectedSlot)?.time;
+      const timeSlot =
+        timeSlots.find((slot) => slot.id === selectedSlot)?.time || "";
 
       const bookingData = {
         stationId,
@@ -104,23 +99,17 @@ export function BookingModal({
         totalAmount: calculatePrice(),
       };
 
-      // 🚨 DEBUG: Log exactly what you're sending
-      console.log("📦 Booking Payload:", bookingData);
+      console.log("📦 Sending Booking Payload:", bookingData);
 
-      // ✅ Validate all fields before sending
-      if (
-        !stationId ||
-        !stationName ||
-        !selectedConnector ||
-        !bookingDate ||
-        !timeSlot
-      ) {
-        toast.error("Missing booking details. Please complete all steps.");
+      // 🧪 Backend-required fields check
+      if (!stationName || !selectedConnector || !bookingDate || !timeSlot) {
+        toast.error("Missing required booking fields.");
         return;
       }
 
       try {
         setLoading(true);
+
         const response = await fetch(`${API_BASE_URL}/bookings`, {
           method: "POST",
           headers: {
@@ -134,17 +123,17 @@ export function BookingModal({
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || "Booking failed");
 
-        console.log("✅ Booking success:", data);
+        console.log("✅ Booking Successful:", data);
         setBookingComplete(true);
-        toast.success("Booking confirmed successfully!");
+        toast.success("Booking Confirmed!");
       } catch (err: any) {
-        console.error("❌ Booking error:", err);
+        console.error("❌ Booking Error:", err);
         toast.error(err.message || "Failed to create booking");
       } finally {
         setLoading(false);
       }
     } else {
-      setStep(step + 1);
+      setStep((prev) => prev + 1);
     }
   };
 
@@ -169,6 +158,7 @@ export function BookingModal({
               </DialogDescription>
             </DialogHeader>
 
+            {/* Step 1 - Date */}
             {step === 1 && (
               <div className="py-4">
                 <h4 className="text-sm font-medium mb-3">Select Date</h4>
@@ -176,12 +166,15 @@ export function BookingModal({
                   mode="single"
                   selected={date}
                   onSelect={setDate}
+                  disabled={(d) =>
+                    d < new Date(new Date().setHours(0, 0, 0, 0))
+                  }
                   className="rounded-md border mx-auto"
-                  disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
                 />
               </div>
             )}
 
+            {/* Step 2 - Connector */}
             {step === 2 && (
               <div className="space-y-4 py-4">
                 <h4 className="text-sm font-medium mb-2">Choose Connector</h4>
@@ -207,11 +200,13 @@ export function BookingModal({
               </div>
             )}
 
+            {/* Step 3 - Time slot */}
             {step === 3 && (
               <div className="space-y-4 py-4">
                 <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
                   <Clock className="h-4 w-4 text-ev-blue" /> Select Time Slot
                 </h4>
+
                 <div className="grid grid-cols-2 gap-2">
                   {timeSlots.map((slot) => (
                     <Button
@@ -246,6 +241,7 @@ export function BookingModal({
                   Back
                 </Button>
               )}
+
               <Button
                 className="bg-gradient-to-r from-ev-blue to-ev-green"
                 onClick={handleNext}
