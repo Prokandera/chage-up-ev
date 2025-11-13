@@ -9,16 +9,16 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Clock, CreditCard, CheckCircle } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Clock, CreditCard, CheckCircle, Zap } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { API_BASE_URL } from "@/config"; // ✅ centralized base URL
+import { API_BASE_URL } from "@/config";
 
 interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
+  stationId: string; // ✅ Added stationId
   stationName: string;
   connectorTypes: string[];
 }
@@ -26,6 +26,7 @@ interface BookingModalProps {
 export function BookingModal({
   isOpen,
   onClose,
+  stationId,
   stationName,
   connectorTypes,
 }: BookingModalProps) {
@@ -49,12 +50,6 @@ export function BookingModal({
     AC: 60,
   };
 
-  const calculatePrice = () => {
-    if (!selectedConnector || selectedSlot === null) return 0;
-    const baseRate = connectorPricing[selectedConnector] || 80;
-    return baseRate * 1; // 1 hour
-  };
-
   const timeSlots = [
     { id: 1, time: "8:00 AM - 9:00 AM" },
     { id: 2, time: "9:00 AM - 10:00 AM" },
@@ -67,8 +62,28 @@ export function BookingModal({
     { id: 9, time: "4:00 PM - 5:00 PM" },
   ];
 
-  // ✅ Booking API Call
+  const calculatePrice = () => {
+    if (!selectedConnector || selectedSlot === null) return 0;
+    const baseRate = connectorPricing[selectedConnector] || 80;
+    return baseRate;
+  };
+
   const handleNext = async () => {
+    // ✅ Step validation
+    if (step === 1 && !date) {
+      toast.error("Please select a date");
+      return;
+    }
+    if (step === 2 && !selectedConnector) {
+      toast.error("Please select a connector type");
+      return;
+    }
+    if (step === 3 && selectedSlot === null) {
+      toast.error("Please select a time slot");
+      return;
+    }
+
+    // ✅ Step 3 → API Call
     if (step === 3) {
       const token = localStorage.getItem("token");
       if (!user || !token) {
@@ -80,7 +95,9 @@ export function BookingModal({
 
       try {
         setLoading(true);
+
         const bookingData = {
+          stationId, // ✅ Added
           stationName,
           connectorType: selectedConnector,
           bookingDate: date?.toISOString().split("T")[0],
@@ -88,7 +105,7 @@ export function BookingModal({
           totalAmount: calculatePrice(),
         };
 
-        console.log("📡 Posting booking to:", `${API_BASE_URL}/bookings`);
+        console.log("📡 Sending booking data:", bookingData);
 
         const response = await fetch(`${API_BASE_URL}/bookings`, {
           method: "POST",
@@ -103,6 +120,7 @@ export function BookingModal({
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || "Booking failed");
 
+        console.log("✅ Booking success:", data);
         setBookingComplete(true);
         toast.success("✅ Booking confirmed!");
       } catch (err: any) {
@@ -137,7 +155,79 @@ export function BookingModal({
               </DialogDescription>
             </DialogHeader>
 
-            {/* simplified steps code (same as before) */}
+            {/* ✅ STEP 1: Select Date */}
+            {step === 1 && (
+              <div className="py-4">
+                <h4 className="text-sm font-medium mb-3">Select Date</h4>
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={setDate}
+                  className="rounded-md border mx-auto"
+                  disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
+                />
+              </div>
+            )}
+
+            {/* ✅ STEP 2: Select Connector Type */}
+            {step === 2 && (
+              <div className="space-y-4 py-4">
+                <h4 className="text-sm font-medium mb-2">Choose Connector</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  {connectorTypes.map((type) => (
+                    <Button
+                      key={type}
+                      variant={
+                        selectedConnector === type ? "default" : "outline"
+                      }
+                      className={`w-full ${
+                        selectedConnector === type
+                          ? "bg-gradient-to-r from-ev-blue to-ev-green text-white"
+                          : ""
+                      }`}
+                      onClick={() => setSelectedConnector(type)}
+                    >
+                      <Zap className="h-4 w-4 mr-1" />
+                      {type}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ✅ STEP 3: Select Time Slot */}
+            {step === 3 && (
+              <div className="space-y-4 py-4">
+                <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-ev-blue" /> Select Time Slot
+                </h4>
+                <div className="grid grid-cols-2 gap-2">
+                  {timeSlots.map((slot) => (
+                    <Button
+                      key={slot.id}
+                      variant={
+                        selectedSlot === slot.id ? "default" : "outline"
+                      }
+                      onClick={() => setSelectedSlot(slot.id)}
+                      className={`${
+                        selectedSlot === slot.id
+                          ? "bg-gradient-to-r from-ev-blue to-ev-green text-white"
+                          : ""
+                      }`}
+                    >
+                      {slot.time}
+                    </Button>
+                  ))}
+                </div>
+
+                <div className="mt-4 flex justify-between items-center border-t pt-3">
+                  <p className="text-sm text-gray-500">Estimated Price:</p>
+                  <p className="text-lg font-semibold text-ev-green">
+                    ₹{calculatePrice()}
+                  </p>
+                </div>
+              </div>
+            )}
 
             <DialogFooter className="flex justify-between">
               {step > 1 && (
@@ -159,6 +249,7 @@ export function BookingModal({
             </DialogFooter>
           </>
         ) : (
+          // ✅ Booking success screen
           <div className="py-10 text-center">
             <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
               <CheckCircle className="h-6 w-6 text-green-600" />

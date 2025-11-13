@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, MapPin, ArrowLeft } from "lucide-react";
-import { API_BASE_URL } from "@/config"; // ✅ centralized API base URL
+import { API_BASE_URL } from "@/config";
 
 const FindStations = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -22,26 +22,21 @@ const FindStations = () => {
 
   const navigate = useNavigate();
 
-  // ✅ Fetch stations dynamically from backend
+  // ✅ Fetch stations from backend
   useEffect(() => {
     const fetchStations = async () => {
       try {
         console.log("🌐 Fetching stations from:", `${API_BASE_URL}/stations`);
-
         const response = await fetch(`${API_BASE_URL}/stations`, {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          // ✅ Include this to handle Render + Vercel CORS safely
+          headers: { "Content-Type": "application/json" },
           mode: "cors",
         });
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch stations: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`Failed to fetch stations: ${response.status}`);
 
         const data = await response.json();
+        console.log("✅ Stations fetched:", data);
         setStations(data);
       } catch (err: any) {
         console.error("❌ Station fetch error:", err);
@@ -54,23 +49,26 @@ const FindStations = () => {
     fetchStations();
   }, []);
 
-  // ✅ Filter stations by name or address
+  // ✅ Filter stations
   const filteredStations = stations.filter(
     (station) =>
       station.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       station.address?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const selectedStation = stations.find((s) => s._id === selectedStationId);
+  const selectedStation = stations.find(
+    (s) => String(s._id) === String(selectedStationId)
+  );
 
   const handleBookingClick = (stationId: string) => {
+    console.log("🟢 Booking clicked for:", stationId);
     setSelectedStationId(stationId);
     setIsBookingModalOpen(true);
   };
 
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden">
-      {/* Background animations */}
+      {/* Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-40 right-20 w-32 h-32 bg-primary/5 rounded-full animate-float" />
         <div className="absolute bottom-40 left-20 w-24 h-24 bg-secondary/5 rounded-full animate-float-delayed" />
@@ -107,6 +105,7 @@ const FindStations = () => {
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6 mb-8">
+          {/* Left side list */}
           <div className="w-full lg:w-1/2">
             <div className="flex items-center mb-4 relative">
               <MapPin className="absolute left-3 text-gray-400 h-5 w-5" />
@@ -187,7 +186,7 @@ const FindStations = () => {
             </div>
           </div>
 
-          {/* ✅ Side Map for desktop */}
+          {/* Right-side Map (desktop only) */}
           <div className="hidden lg:block w-1/2">
             <div className="h-[600px] rounded-lg overflow-hidden">
               <MapView
@@ -201,13 +200,14 @@ const FindStations = () => {
 
       <Footer />
 
-      {/* ✅ Booking Modal */}
+      {/* ✅ Booking Modal with stationId passed */}
       {selectedStation && (
         <BookingModal
           isOpen={isBookingModalOpen}
           onClose={() => setIsBookingModalOpen(false)}
+          stationId={selectedStation._id} // ✅ Added
           stationName={selectedStation.name}
-          connectorTypes={selectedStation.connectorTypes}
+          connectorTypes={selectedStation.connectorTypes || ["Type 2", "CCS2", "CHAdeMO"]}
         />
       )}
     </div>
@@ -215,3 +215,4 @@ const FindStations = () => {
 };
 
 export default FindStations;
+
