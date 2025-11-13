@@ -202,21 +202,19 @@ const FindStations = () => {
       {/* *******************************
            FINAL FIX: SAFE MOUNTING
       ******************************** */}
-      {isBookingModalOpen &&
-        selectedStation &&
-        selectedStation._id && (
-          <BookingModal
-            isOpen={isBookingModalOpen}
-            onClose={() => setIsBookingModalOpen(false)}
-            stationId={selectedStation._id}
-            stationName={selectedStation.name}
-            connectorTypes={
-              selectedStation.connectorTypes?.length
-                ? selectedStation.connectorTypes
-                : ["Type 2", "CCS2", "CHAdeMO"] // fallback prevents crash
-            }
-          />
-        )}
+      {selectedStation && (
+        <BookingModal
+          isOpen={isBookingModalOpen}
+          onClose={() => setIsBookingModalOpen(false)}
+          stationId={selectedStation._id}  // ✅ MUST SEND THIS
+          stationName={selectedStation.name}
+          connectorTypes={
+            selectedStation.connectorTypes?.length > 0
+            ? selectedStation.connectorTypes
+            : ["Type 2", "CCS", "CHAdeMO"]  // ✅ SAFE fallback so UI NEVER BREAKS
+          } 
+        />
+      )}
     </div>
   );
 };

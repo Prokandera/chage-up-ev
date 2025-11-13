@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -18,7 +18,7 @@ import { API_BASE_URL } from "@/config";
 interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  stationId: string;        // ✅ required
+  stationId: string;
   stationName: string;
   connectorTypes: string[];
 }
@@ -34,10 +34,14 @@ export function BookingModal({
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  // ✅ ALWAYS ensure connectorTypes has values
+  const safeConnectorTypes =
+    connectorTypes?.length > 0 ? connectorTypes : ["Type 2", "CCS", "CHAdeMO"];
+
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
-  const [selectedConnector, setSelectedConnector] = useState<string | null>(
-    connectorTypes[0] || null
+  const [selectedConnector, setSelectedConnector] = useState<string>(
+    safeConnectorTypes[0]
   );
   const [step, setStep] = useState(1);
   const [bookingComplete, setBookingComplete] = useState(false);
@@ -66,76 +70,67 @@ export function BookingModal({
   const calculatePrice = () =>
     selectedConnector ? connectorPricing[selectedConnector] || 80 : 0;
 
-const handleNext = async () => {
-  if (step === 1 && !date) return toast.error("Please select a date.");
-  if (step === 2 && !selectedConnector)
-    return toast.error("Please select a connector type.");
-  if (step === 3 && selectedSlot === null)
-    return toast.error("Please select a time slot.");
+  const handleNext = async () => {
+    if (step === 1 && !date) return toast.error("Please select a date.");
+    if (step === 2 && !selectedConnector)
+      return toast.error("Please select a connector type.");
+    if (step === 3 && selectedSlot === null)
+      return toast.error("Please select a time slot.");
 
-  if (step === 3) {
-    const token = localStorage.getItem("token");
+    if (step === 3) {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Please sign in to complete booking");
+        navigate("/auth?mode=login");
+        handleClose();
+        return;
+      }
 
-    if (!token || !user) {
-      toast.error("Please sign in to complete booking");
-      navigate("/auth?mode=login");
-      handleClose();
-      return;
+      const slotText =
+        timeSlots.find((s) => s.id === selectedSlot)?.time || "";
+
+      const bookingData = {
+        stationId,
+        stationName,
+        connectorType: selectedConnector,
+        bookingDate: date?.toISOString().split("T")[0],
+        timeSlot: slotText,
+        totalAmount: calculatePrice(),
+      };
+
+      console.log("📦 FINAL PAYLOAD:", bookingData);
+
+      try {
+        setLoading(true);
+
+        const res = await fetch(`${API_BASE_URL}/bookings`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(bookingData),
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Booking failed");
+
+        setBookingComplete(true);
+        toast.success("Booking Confirmed!");
+      } catch (err: any) {
+        toast.error(err.message || "Booking failed");
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      setStep(step + 1);
     }
-
-    const finalDate = date?.toISOString().split("T")[0] || "";
-    const slotObj = timeSlots.find((s) => s.id === selectedSlot);
-    const slotText = slotObj ? slotObj.time : ""; // <-- FIXED
-
-    const bookingData = {
-      stationId,
-      stationName,
-      connectorType: selectedConnector,
-      bookingDate: finalDate,
-      timeSlot: slotText,    // <-- FIXED (guaranteed to exist)
-      totalAmount: calculatePrice(),
-    };
-
-    console.log("📦 FINAL BOOKING PAYLOAD:", bookingData);
-
-    if (!stationId || !stationName || !selectedConnector || !finalDate || !slotText) {
-      toast.error("Missing required booking fields.");
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      const response = await fetch(`${API_BASE_URL}/bookings`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(bookingData),
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Booking failed");
-
-      setBookingComplete(true);
-      toast.success("Booking confirmed!");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to create booking");
-    } finally {
-      setLoading(false);
-    }
-  } else {
-    setStep((p) => p + 1);
-  }
-};
-
+  };
 
   const handleClose = () => {
-    setDate(new Date());
-    setSelectedSlot(null);
-    setSelectedConnector(connectorTypes[0] || null);
     setStep(1);
+    setSelectedSlot(null);
+    setSelectedConnector(safeConnectorTypes[0]);
     setBookingComplete(false);
     onClose();
   };
@@ -148,11 +143,11 @@ const handleNext = async () => {
             <DialogHeader>
               <DialogTitle>Book a Charging Slot</DialogTitle>
               <DialogDescription>
-                {stationName} | Step {step} of 3
+                {stationName} • Step {step} of 3
               </DialogDescription>
             </DialogHeader>
 
-            {/* Step Layouts */}
+            {/* STEP 1 */}
             {step === 1 && (
               <div className="py-4">
                 <h4 className="text-sm font-medium mb-3">Select Date</h4>
@@ -168,31 +163,32 @@ const handleNext = async () => {
               </div>
             )}
 
+            {/* STEP 2 */}
             {step === 2 && (
               <div className="space-y-4 py-4">
                 <h4 className="text-sm font-medium mb-2">Choose Connector</h4>
                 <div className="grid grid-cols-2 gap-3">
-                  {connectorTypes.map((type) => (
+                  {safeConnectorTypes.map((type) => (
                     <Button
                       key={type}
                       variant={
                         selectedConnector === type ? "default" : "outline"
                       }
+                      onClick={() => setSelectedConnector(type)}
                       className={
                         selectedConnector === type
                           ? "bg-gradient-to-r from-ev-blue to-ev-green text-white"
                           : ""
                       }
-                      onClick={() => setSelectedConnector(type)}
                     >
-                      <Zap className="h-4 w-4 mr-1" />
-                      {type}
+                      <Zap className="h-4 w-4 mr-1" /> {type}
                     </Button>
                   ))}
                 </div>
               </div>
             )}
 
+            {/* STEP 3 */}
             {step === 3 && (
               <div className="space-y-4 py-4">
                 <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
@@ -206,12 +202,12 @@ const handleNext = async () => {
                       variant={
                         selectedSlot === slot.id ? "default" : "outline"
                       }
+                      onClick={() => setSelectedSlot(slot.id)}
                       className={
                         selectedSlot === slot.id
                           ? "bg-gradient-to-r from-ev-blue to-ev-green text-white"
                           : ""
                       }
-                      onClick={() => setSelectedSlot(slot.id)}
                     >
                       {slot.time}
                     </Button>
@@ -236,7 +232,6 @@ const handleNext = async () => {
               <Button
                 className="bg-gradient-to-r from-ev-blue to-ev-green"
                 onClick={handleNext}
-                disabled={loading}
               >
                 {loading
                   ? "Processing..."
