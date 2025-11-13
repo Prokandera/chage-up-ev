@@ -20,6 +20,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { API_BASE_URL } from "@/config"; // ✅ Import centralized API URL
 
 interface Booking {
   _id: string;
@@ -58,15 +59,16 @@ const Profile = () => {
         const token = localStorage.getItem("token");
         if (!token) throw new Error("No token found");
 
-        // Mock user data
         setProfile({
           email: user?.email || "user@example.com",
           full_name: user?.user_metadata?.name || "EV User",
         });
 
-        const res = await fetch("http://localhost:5000/api/bookings", {
+        // ✅ Use API_BASE_URL instead of localhost
+        const res = await fetch(`${API_BASE_URL}/bookings`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+
         if (!res.ok) throw new Error("Failed to fetch bookings");
         const data = await res.json();
         setBookings(data);
@@ -93,16 +95,15 @@ const Profile = () => {
       const token = localStorage.getItem("token");
       if (!token) return toast.error("Not authorized");
 
-      const res = await fetch(`http://localhost:5000/api/bookings/${bookingId}`, {
+      // ✅ Updated delete URL to use API_BASE_URL
+      const res = await fetch(`${API_BASE_URL}/bookings/${bookingId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
 
       if (!res.ok) throw new Error("Failed to cancel booking");
 
-      const data = await res.json();
       toast.success("Booking cancelled successfully");
-      // Update state instantly
       setBookings((prev) =>
         prev.map((b) =>
           b._id === bookingId ? { ...b, status: "cancelled" } : b
