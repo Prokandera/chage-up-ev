@@ -18,7 +18,7 @@ import { API_BASE_URL } from "@/config";
 interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  stationId: string;
+  stationId: string;        // ✅ required
   stationName: string;
   connectorTypes: string[];
 }
@@ -30,6 +30,7 @@ export function BookingModal({
   stationName,
   connectorTypes,
 }: BookingModalProps) {
+
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -42,7 +43,7 @@ export function BookingModal({
   const [bookingComplete, setBookingComplete] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const connectorPricing: { [key: string]: number } = {
+  const connectorPricing: Record<string, number> = {
     "Type 2": 80,
     CCS: 120,
     CHAdeMO: 100,
@@ -62,47 +63,43 @@ export function BookingModal({
     { id: 9, time: "4:00 PM - 5:00 PM" },
   ];
 
-  const calculatePrice = () => {
-    if (!selectedConnector) return 0;
-    return connectorPricing[selectedConnector] || 80;
-  };
+  const calculatePrice = () =>
+    selectedConnector ? connectorPricing[selectedConnector] || 80 : 0;
 
   const handleNext = async () => {
-    // 🛑 Step validation
+
     if (step === 1 && !date) return toast.error("Please select a date.");
     if (step === 2 && !selectedConnector)
       return toast.error("Please select a connector type.");
     if (step === 3 && selectedSlot === null)
       return toast.error("Please select a time slot.");
 
-    // 🟢 Final step — Send booking request
     if (step === 3) {
       const token = localStorage.getItem("token");
-
-      if (!user || !token) {
-        toast.error("Please sign in to complete booking.");
+      if (!token || !user) {
+        toast.error("Please sign in to complete booking");
         navigate("/auth?mode=login");
         handleClose();
         return;
       }
 
-      const bookingDate = date?.toISOString().split("T")[0] || "";
-      const timeSlot =
-        timeSlots.find((slot) => slot.id === selectedSlot)?.time || "";
+      const finalDate = date?.toISOString().split("T")[0] || "";
+      const slotText =
+        timeSlots.find((s) => s.id === selectedSlot)?.time || "";
 
       const bookingData = {
-        stationId,
+        stationId,              // ✅ fixed
         stationName,
         connectorType: selectedConnector,
-        bookingDate,
-        timeSlot,
+        bookingDate: finalDate,
+        timeSlot: slotText,     // ✅ fixed
         totalAmount: calculatePrice(),
       };
 
-      console.log("📦 Sending Booking Payload:", bookingData);
+      console.log("📦 FINAL BOOKING PAYLOAD SENT TO BACKEND:", bookingData);
 
-      // 🧪 Backend-required fields check
-      if (!stationName || !selectedConnector || !bookingDate || !timeSlot) {
+      // Backend-required validation
+      if (!stationId || !stationName || !selectedConnector || !finalDate || !slotText) {
         toast.error("Missing required booking fields.");
         return;
       }
@@ -116,16 +113,15 @@ export function BookingModal({
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          mode: "cors",
           body: JSON.stringify(bookingData),
         });
 
         const data = await response.json();
+
         if (!response.ok) throw new Error(data.error || "Booking failed");
 
-        console.log("✅ Booking Successful:", data);
         setBookingComplete(true);
-        toast.success("Booking Confirmed!");
+        toast.success("Booking confirmed!");
       } catch (err: any) {
         console.error("❌ Booking Error:", err);
         toast.error(err.message || "Failed to create booking");
@@ -133,7 +129,7 @@ export function BookingModal({
         setLoading(false);
       }
     } else {
-      setStep((prev) => prev + 1);
+      setStep((p) => p + 1);
     }
   };
 
@@ -158,7 +154,7 @@ export function BookingModal({
               </DialogDescription>
             </DialogHeader>
 
-            {/* Step 1 - Date */}
+            {/* Step Layouts */}
             {step === 1 && (
               <div className="py-4">
                 <h4 className="text-sm font-medium mb-3">Select Date</h4>
@@ -174,7 +170,6 @@ export function BookingModal({
               </div>
             )}
 
-            {/* Step 2 - Connector */}
             {step === 2 && (
               <div className="space-y-4 py-4">
                 <h4 className="text-sm font-medium mb-2">Choose Connector</h4>
@@ -185,11 +180,11 @@ export function BookingModal({
                       variant={
                         selectedConnector === type ? "default" : "outline"
                       }
-                      className={`w-full ${
+                      className={
                         selectedConnector === type
                           ? "bg-gradient-to-r from-ev-blue to-ev-green text-white"
                           : ""
-                      }`}
+                      }
                       onClick={() => setSelectedConnector(type)}
                     >
                       <Zap className="h-4 w-4 mr-1" />
@@ -200,7 +195,6 @@ export function BookingModal({
               </div>
             )}
 
-            {/* Step 3 - Time slot */}
             {step === 3 && (
               <div className="space-y-4 py-4">
                 <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
@@ -214,20 +208,20 @@ export function BookingModal({
                       variant={
                         selectedSlot === slot.id ? "default" : "outline"
                       }
-                      onClick={() => setSelectedSlot(slot.id)}
-                      className={`${
+                      className={
                         selectedSlot === slot.id
                           ? "bg-gradient-to-r from-ev-blue to-ev-green text-white"
                           : ""
-                      }`}
+                      }
+                      onClick={() => setSelectedSlot(slot.id)}
                     >
                       {slot.time}
                     </Button>
                   ))}
                 </div>
 
-                <div className="mt-4 flex justify-between items-center border-t pt-3">
-                  <p className="text-sm text-gray-500">Estimated Price:</p>
+                <div className="flex justify-between mt-4 border-t pt-3">
+                  <p className="text-sm text-gray-500">Estimated Price</p>
                   <p className="text-lg font-semibold text-ev-green">
                     ₹{calculatePrice()}
                   </p>
@@ -241,7 +235,6 @@ export function BookingModal({
                   Back
                 </Button>
               )}
-
               <Button
                 className="bg-gradient-to-r from-ev-blue to-ev-green"
                 onClick={handleNext}
@@ -257,16 +250,15 @@ export function BookingModal({
           </>
         ) : (
           <div className="py-10 text-center">
-            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+            <div className="mx-auto h-12 w-12 bg-green-100 flex items-center justify-center rounded-full">
               <CheckCircle className="h-6 w-6 text-green-600" />
             </div>
-            <h3 className="text-lg font-medium mt-3">Booking Confirmed!</h3>
+            <h3 className="text-lg font-medium mt-3">
+              Booking Confirmed!
+            </h3>
             <Button
+              onClick={() => navigate("/profile")}
               className="w-full mt-4 bg-gradient-to-r from-ev-blue to-ev-green"
-              onClick={() => {
-                navigate("/profile");
-                handleClose();
-              }}
             >
               View My Bookings
             </Button>
