@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Clock, CreditCard, CheckCircle, Zap } from "lucide-react";
+import { Clock, CheckCircle, Zap } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -18,7 +18,7 @@ import { API_BASE_URL } from "@/config";
 interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  stationId: string; // ✅ Added stationId
+  stationId: string;
   stationName: string;
   connectorTypes: string[];
 }
@@ -32,6 +32,7 @@ export function BookingModal({
 }: BookingModalProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
+
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   const [selectedConnector, setSelectedConnector] = useState<string | null>(
@@ -46,7 +47,6 @@ export function BookingModal({
     CCS: 120,
     CHAdeMO: 100,
     "DC Fast": 150,
-    "Tesla Supercharger": 180,
     AC: 60,
   };
 
@@ -63,13 +63,12 @@ export function BookingModal({
   ];
 
   const calculatePrice = () => {
-    if (!selectedConnector || selectedSlot === null) return 0;
-    const baseRate = connectorPricing[selectedConnector] || 80;
-    return baseRate;
+    if (!selectedConnector) return 0;
+    return connectorPricing[selectedConnector] || 80;
   };
 
   const handleNext = async () => {
-    // ✅ Step validation
+    // ✅ Ensure each step has valid input
     if (step === 1 && !date) {
       toast.error("Please select a date");
       return;
@@ -83,7 +82,7 @@ export function BookingModal({
       return;
     }
 
-    // ✅ Step 3 → API Call
+    // ✅ If final step, make booking request
     if (step === 3) {
       const token = localStorage.getItem("token");
       if (!user || !token) {
@@ -93,20 +92,35 @@ export function BookingModal({
         return;
       }
 
+      const bookingDate = date?.toISOString().split("T")[0] || "";
+      const timeSlot = timeSlots.find((slot) => slot.id === selectedSlot)?.time;
+
+      const bookingData = {
+        stationId,
+        stationName,
+        connectorType: selectedConnector,
+        bookingDate,
+        timeSlot,
+        totalAmount: calculatePrice(),
+      };
+
+      // 🚨 DEBUG: Log exactly what you're sending
+      console.log("📦 Booking Payload:", bookingData);
+
+      // ✅ Validate all fields before sending
+      if (
+        !stationId ||
+        !stationName ||
+        !selectedConnector ||
+        !bookingDate ||
+        !timeSlot
+      ) {
+        toast.error("Missing booking details. Please complete all steps.");
+        return;
+      }
+
       try {
         setLoading(true);
-
-        const bookingData = {
-          stationId, // ✅ Added
-          stationName,
-          connectorType: selectedConnector,
-          bookingDate: date?.toISOString().split("T")[0],
-          timeSlot: timeSlots.find((slot) => slot.id === selectedSlot)?.time,
-          totalAmount: calculatePrice(),
-        };
-
-        console.log("📡 Sending booking data:", bookingData);
-
         const response = await fetch(`${API_BASE_URL}/bookings`, {
           method: "POST",
           headers: {
@@ -122,7 +136,7 @@ export function BookingModal({
 
         console.log("✅ Booking success:", data);
         setBookingComplete(true);
-        toast.success("✅ Booking confirmed!");
+        toast.success("Booking confirmed successfully!");
       } catch (err: any) {
         console.error("❌ Booking error:", err);
         toast.error(err.message || "Failed to create booking");
@@ -155,7 +169,6 @@ export function BookingModal({
               </DialogDescription>
             </DialogHeader>
 
-            {/* ✅ STEP 1: Select Date */}
             {step === 1 && (
               <div className="py-4">
                 <h4 className="text-sm font-medium mb-3">Select Date</h4>
@@ -169,7 +182,6 @@ export function BookingModal({
               </div>
             )}
 
-            {/* ✅ STEP 2: Select Connector Type */}
             {step === 2 && (
               <div className="space-y-4 py-4">
                 <h4 className="text-sm font-medium mb-2">Choose Connector</h4>
@@ -195,7 +207,6 @@ export function BookingModal({
               </div>
             )}
 
-            {/* ✅ STEP 3: Select Time Slot */}
             {step === 3 && (
               <div className="space-y-4 py-4">
                 <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
@@ -249,7 +260,6 @@ export function BookingModal({
             </DialogFooter>
           </>
         ) : (
-          // ✅ Booking success screen
           <div className="py-10 text-center">
             <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
               <CheckCircle className="h-6 w-6 text-green-600" />
