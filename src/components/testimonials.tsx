@@ -5,22 +5,22 @@ export function Testimonials() {
       id: 1,
       quote: "ElectricChargeHub has completely transformed how I plan my trips. I never worry about finding a charging station anymore.",
       author: "Abhishek Kandera",
-      role: "Tesla Model 3 Owner",
-      image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+      role: "Full Stack Developer",
+      image: "",
     },
     {
       id: 2,
       quote: "As someone who travels frequently for work, this app has been a game-changer. Booking charging slots in advance gives me peace of mind.",
       author: "Shashank Tyagi",
-      role: "Nissan Leaf Driver",
-      image: "https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+      role: "API Engineer",
+      image: "",
     },
     {
       id: 3,
       quote: "The real-time availability feature is incredible. I've saved countless hours that I would have spent driving to unavailable stations.",
       author: "Sunny Kumar",
-      role: "Kia EV6 Owner",
-      image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+      role: "Backend Developer",
+      image: "",
     },
   ];
 

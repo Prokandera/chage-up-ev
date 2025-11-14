@@ -36,15 +36,15 @@ export function HeroSection() {
                 Find charging stations near you
               </p>
               <div className="mt-3 sm:flex">
-                <label htmlFor="zipCode" className="sr-only">
-                  ZIP Code
+                <label htmlFor="pinCode" className="sr-only">
+                  PIN Code
                 </label>
                 <input
                   type="text"
-                  name="zipCode"
-                  id="zipCode"
+                  name="pinCode"
+                  id="pinCode"
                   className="block w-full py-3 px-4 rounded-md placeholder-gray-500 shadow-sm border border-gray-300 focus:ring-ev-blue focus:border-ev-blue sm:flex-1"
-                  placeholder="Enter your ZIP code"
+                  placeholder="Enter your PIN code"
                   value={zipCode}
                   onChange={(e) => setZipCode(e.target.value)}
                 />
