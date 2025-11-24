@@ -6,6 +6,8 @@ import authRoutes from "./routes/auth.js";
 import stationRoutes from "./routes/stations.js";
 import bookingRoutes from "./routes/bookings.js";
 import authenticateToken from "./middleware/authmiddleware.js";
+import cancelBookingRoute from "./routes/cancelBooking.js";
+
 
 dotenv.config();
 
@@ -61,6 +63,8 @@ mongoose
 app.use("/api/auth", authRoutes);
 app.use("/api/stations", stationRoutes);
 app.use("/api/bookings", bookingRoutes);
+app.use("/api/cancel-booking", cancelBookingRoute);
+
 
 app.get("/", (req, res) => res.send("⚡ Server running & connected!"));
 

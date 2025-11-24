@@ -38,6 +38,14 @@ const bookingSchema = new mongoose.Schema({
         enum: ["confirmed", "cancelled", "completed"],
         default: "confirmed",
     },
+    refundStatus: {
+        type: String,
+        default: "none", // none | pending | processed
+    },
+    refundAmount: {
+        type: Number,
+        default: 0,
+    },
 }, { timestamps: true });
 
 export default mongoose.model("Booking", bookingSchema);
