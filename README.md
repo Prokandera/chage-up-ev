@@ -1,73 +1,226 @@
-# Welcome to your Lovable project
+🚗⚡ ChargeUp EV – Smart EV Charging Station Finder & Booking System
 
-## Project info
+A full-stack MERN project for discovering, booking, and managing EV charging slots with payment-ready workflow.
 
-**URL**: https://lovable.dev/projects/6bec95da-7839-4afe-b6e9-43a1c0724e61
+🚀 Overview
 
-## How can I edit this code?
+ChargeUp EV is a complete end-to-end solution that allows EV users to:
 
-There are several ways of editing your application.
+Find nearby EV charging stations
 
-**Use Lovable**
+View connector types, pricing & availability
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/6bec95da-7839-4afe-b6e9-43a1c0724e61) and start prompting.
+Book charging slots easily
 
-Changes made via Lovable will be committed automatically to this repo.
+Manage bookings in their profile
 
-**Use your preferred IDE**
+Cancel bookings with instant refund updates
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Access live station data from a centralized backend
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+This platform is designed for scalability and can be deployed for real-world EV stations.
 
-Follow these steps:
+✨ Features
+🔍 Search & Explore
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+View nearby charging stations
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+See real-time availability
 
-# Step 3: Install the necessary dependencies.
-npm i
+Explore connector types (Type2, CCS, CHAdeMO, etc.)
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+⚡ Booking System
+
+Book slots for a specific date & time
+
+Pricing & connector-based booking
+
+Instant booking confirmation
+
+👤 User Authentication
+
+Secure JWT authentication
+
+Login / Register / Logout
+
+Protected routes
+
+🧾 Profile Dashboard
+
+See all past & upcoming bookings
+
+Status badges: confirmed, cancelled
+
+Refund status: processed, amount refunded
+
+🟥 Cancellation + Refunds
+
+Cancel booking in one click
+
+Slot becomes available again
+
+Refund processed instantly
+
+UI automatically updates without page refresh
+
+📱 Responsive UI
+
+Built with shadcn/ui + TailwindCSS
+
+Clean animations and modern EV-themed colors
+
+🛠️ Tech Stack
+Frontend
+
+React + TypeScript
+
+Vite
+
+TailwindCSS
+
+shadcn/ui
+
+lucide-react icons
+
+Backend
+
+Node.js
+
+Express.js
+
+MongoDB + Mongoose
+
+JWT Authentication
+
+Helmet + CORS
+
+Deployment
+
+Frontend → Vercel
+
+Backend → Render
+
+MongoDB → MongoDB Atlas
+
+📁 Project Structure
+charge-up-spots-nearby-83/
+├── src/                   # Frontend (React + Vite)
+│   ├── pages/
+│   ├── components/
+│   ├── contexts/
+│   ├── assets/
+│   ├── config.ts
+│   └── main.tsx
+│
+└── server/                # Backend (Node + Express)
+    ├── routes/
+    │   ├── auth.js
+    │   ├── stations.js
+    │   ├── bookings.js
+    │   └── cancelBooking.js
+    ├── models/
+    │   ├── User.js
+    │   ├── Booking.js
+    │   └── Station.js
+    ├── middleware/
+    │   └── authmiddleware.js
+    ├── server.js
+    └── package.json
+
+⚙️ Environment Variables
+
+Create a .env file in /server:
+
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_secret_key
+PORT=5000
+
+
+And in the frontend .env:
+
+VITE_API_URL=https://your-backend-url.onrender.com/api
+
+🧑‍💻 Installation & Setup
+1️⃣ Clone the project
+git clone https://github.com/your-username/charge-up-ev.git
+cd charge-up-ev
+
+2️⃣ Install frontend dependencies
+cd charge-up-spots-nearby-83
+npm install
+
+3️⃣ Install backend dependencies
+cd server
+npm install
+
+▶️ Running the Project
+🟦 Start Backend
+cd server
+npm run start
+
+🟩 Start Frontend
+cd charge-up-spots-nearby-83
 npm run dev
-```
 
-**Edit a file directly in GitHub**
+📡 REST API Endpoints
+🔐 Auth Routes
+Method	Endpoint	Description
+POST	/api/auth/register	Register User
+POST	/api/auth/login	Login User
+⚡ Station Routes
+Method	Endpoint	Description
+GET	/api/stations	Get all stations
+📦 Booking Routes
+Method	Endpoint	Description
+POST	/api/bookings	Create new booking
+GET	/api/bookings	Get all user bookings
+❌ Cancel Booking + Refund
+Method	Endpoint	Description
+DELETE	/api/cancel-booking/:id	Cancel booking + process refund
+🖥️ UI Screens
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Add screenshots in the repo:
 
-**Use GitHub Codespaces**
+/screenshots/home.png
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+/screenshots/stations.png
 
-## What technologies are used for this project?
+/screenshots/profile.png
 
-This project is built with:
+/screenshots/booking.png
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+/screenshots/refund.png
 
-## How can I deploy this project?
+Then add:
 
-Simply open [Lovable](https://lovable.dev/projects/6bec95da-7839-4afe-b6e9-43a1c0724e61) and click on Share -> Publish.
+## 🖼️ Screenshots
 
-## Can I connect a custom domain to my Lovable project?
+### 🔵 Home Page  
+![Home](screenshots/home.png)
 
-Yes, you can!
+### 🔋 Find Stations  
+![Stations](screenshots/stations.png)
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### 👤 Profile Page  
+![Profile](screenshots/profile.png)
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+### 🔄 Refund Badge  
+![Refund](screenshots/refund.png)
+
+🏁 Deployment
+Frontend (Vercel)
+
+Deploy /src
+
+Set environment variable:
+VITE_API_URL=https://your-backend.onrender.com/api
+
+Backend (Render)
+
+Deploy /server
+
+Set env variables
+
+Enable CORS
+
+Auto restart on crash
