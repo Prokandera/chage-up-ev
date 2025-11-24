@@ -20,7 +20,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { API_BASE_URL } from "@/config"; // ✅ Import centralized API URL
+import { API_BASE_URL } from "@/config";
 
 interface Booking {
   _id: string;
@@ -30,6 +30,8 @@ interface Booking {
   timeSlot: string;
   totalAmount: number;
   status: string;
+  refundStatus?: string;     // <-- NEW
+  refundAmount?: number;     // <-- NEW
   createdAt: string;
 }
 
@@ -45,14 +47,12 @@ const Profile = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // 🔐 Redirect if not logged in
   useEffect(() => {
     if (!authLoading && !user) {
       navigate("/auth");
     }
   }, [user, authLoading, navigate]);
 
-  // 📦 Fetch Profile + Bookings
   useEffect(() => {
     const fetchProfileAndBookings = async () => {
       try {
@@ -64,7 +64,6 @@ const Profile = () => {
           full_name: user?.user_metadata?.name || "EV User",
         });
 
-        // ✅ Use API_BASE_URL instead of localhost
         const res = await fetch(`${API_BASE_URL}/bookings`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -89,24 +88,33 @@ const Profile = () => {
     navigate("/");
   };
 
-  // 🗑️ Cancel booking
+  // 🗑️ Cancel booking + refund UI update
   const handleCancelBooking = async (bookingId: string) => {
     try {
       const token = localStorage.getItem("token");
       if (!token) return toast.error("Not authorized");
 
-      // ✅ Updated delete URL to use API_BASE_URL
-      const res = await fetch(`${API_BASE_URL}/bookings/${bookingId}`, {
+      const res = await fetch(`${API_BASE_URL}/cancel-booking/${bookingId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
 
       if (!res.ok) throw new Error("Failed to cancel booking");
 
-      toast.success("Booking cancelled successfully");
+      const result = await res.json();
+
+      toast.success("Booking cancelled & refund processed");
+
       setBookings((prev) =>
         prev.map((b) =>
-          b._id === bookingId ? { ...b, status: "cancelled" } : b
+          b._id === bookingId
+            ? {
+                ...b,
+                status: "cancelled",
+                refundStatus: "processed",
+                refundAmount: result.refundAmount ?? b.totalAmount,
+              }
+            : b
         )
       );
     } catch (err) {
@@ -129,7 +137,8 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        {/* ✅ Top Bar with Back + Sign Out */}
+
+        {/* TOP BAR */}
         <div className="flex justify-between items-center mb-8 animate-fade-in">
           <Button
             variant="outline"
@@ -154,7 +163,7 @@ const Profile = () => {
           </Button>
         </div>
 
-        {/* ✅ Profile Info */}
+        {/* PROFILE INFO */}
         <Card className="mb-8 hover-lift animate-slide-in-left border-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -165,27 +174,25 @@ const Profile = () => {
             </CardTitle>
             <CardDescription>Your account details</CardDescription>
           </CardHeader>
+
           <CardContent className="space-y-4">
             <div className="p-4 rounded-lg bg-gradient-to-br from-blue-50 to-transparent border border-blue-100">
               <p className="text-sm font-medium text-muted-foreground mb-1">
                 Email
               </p>
-              <p className="text-base font-semibold">
-                {profile?.email || "N/A"}
-              </p>
+              <p className="text-base font-semibold">{profile?.email}</p>
             </div>
+
             <div className="p-4 rounded-lg bg-gradient-to-br from-green-50 to-transparent border border-green-100">
               <p className="text-sm font-medium text-muted-foreground mb-1">
                 Full Name
               </p>
-              <p className="text-base font-semibold">
-                {profile?.full_name || "Not set"}
-              </p>
+              <p className="text-base font-semibold">{profile?.full_name}</p>
             </div>
           </CardContent>
         </Card>
 
-        {/* ✅ Bookings */}
+        {/* BOOKINGS */}
         <Card className="hover-lift animate-slide-in-right border-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -224,7 +231,13 @@ const Profile = () => {
                 {bookings.map((booking, index) => (
                   <div
                     key={booking._id || index}
-                    className="border-2 rounded-lg p-4 hover:border-ev-blue transition-all duration-300 bg-gradient-to-br from-white to-gray-50 hover-lift animate-fade-in"
+                    className={`border-2 rounded-lg p-4 transition-all duration-300 bg-gradient-to-br 
+                    from-white to-gray-50 animate-fade-in
+                    ${
+                      booking.status === "cancelled"
+                        ? "opacity-50 grayscale cursor-not-allowed"
+                        : "hover-lift hover:border-ev-blue"
+                    }`}
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
                     <div className="flex justify-between items-start mb-3">
@@ -244,26 +257,34 @@ const Profile = () => {
                           )}
                         </p>
                       </div>
-                      <Badge
-                        variant={
-                          booking.status === "confirmed"
-                            ? "default"
-                            : "secondary"
-                        }
-                        className={`text-white ${
-                          booking.status === "cancelled"
-                            ? "bg-gray-400"
-                            : "bg-gradient-to-r from-ev-blue to-ev-green"
-                        }`}
-                      >
-                        {booking.status}
-                      </Badge>
+
+                      {/* STATUS + REFUND BADGES */}
+                      <div className="flex gap-3">
+                        <Badge
+                          className={`text-white ${
+                            booking.status === "cancelled"
+                              ? "bg-gray-500"
+                              : "bg-gradient-to-r from-ev-blue to-ev-green"
+                          }`}
+                        >
+                          {booking.status}
+                        </Badge>
+
+                        {booking.status === "cancelled" &&
+                          booking.refundStatus === "processed" && (
+                            <Badge className="bg-green-600 text-white">
+                              Refund ₹{booking.refundAmount}
+                            </Badge>
+                          )}
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div className="flex items-center gap-2 p-2 rounded-md bg-blue-50">
                         <Clock className="h-4 w-4 text-ev-blue" />
-                        <span className="font-medium">{booking.timeSlot}</span>
+                        <span className="font-medium">
+                          {booking.timeSlot}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2 p-2 rounded-md bg-green-50">
                         <Zap className="h-4 w-4 text-ev-green" />
@@ -282,6 +303,7 @@ const Profile = () => {
                       </span>
                     </div>
 
+                    {/* CANCEL BUTTON (Only if confirmed) */}
                     {booking.status === "confirmed" && (
                       <Button
                         onClick={() => handleCancelBooking(booking._id)}
