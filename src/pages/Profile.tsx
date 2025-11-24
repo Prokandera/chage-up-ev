@@ -103,7 +103,7 @@ const Profile = () => {
 
       const result = await res.json();
 
-      toast.success("Booking cancelled & refund processed");
+      toast.success("Booking cancelled & refund processed!");
 
       setBookings((prev) =>
         prev.map((b) =>
@@ -112,16 +112,17 @@ const Profile = () => {
                 ...b,
                 status: "cancelled",
                 refundStatus: "processed",
-                refundAmount: result.refundAmount ?? b.totalAmount,
+                refundAmount: result.refundAmount || b.totalAmount,
               }
             : b
-        )
+        ) 
       );
     } catch (err) {
       console.error("Cancel booking error:", err);
       toast.error("Failed to cancel booking");
     }
   };
+
 
   if (authLoading || loading) {
     return (
