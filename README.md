@@ -177,35 +177,6 @@ GET	/api/bookings	Get all user bookings
 ❌ Cancel Booking + Refund
 Method	Endpoint	Description
 DELETE	/api/cancel-booking/:id	Cancel booking + process refund
-🖥️ UI Screens
-
-Add screenshots in the repo:
-
-/screenshots/home.png
-
-/screenshots/stations.png
-
-/screenshots/profile.png
-
-/screenshots/booking.png
-
-/screenshots/refund.png
-
-Then add:
-
-## 🖼️ Screenshots
-
-### 🔵 Home Page  
-![Home](screenshots/home.png)
-
-### 🔋 Find Stations  
-![Stations](screenshots/stations.png)
-
-### 👤 Profile Page  
-![Profile](screenshots/profile.png)
-
-### 🔄 Refund Badge  
-![Refund](screenshots/refund.png)
 
 🏁 Deployment
 Frontend (Vercel)
