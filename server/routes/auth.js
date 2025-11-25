@@ -2,13 +2,21 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { User } from "../models/User.js";
-import { twilioClient } from "../server.js";  // ✔ use same client from server.js
+import twilio from "twilio";
 
 const router = express.Router();
 
+// -----------------------------
+// ✅ Twilio Client (LOCAL)
+// -----------------------------
+const twilioClient = twilio(
+    process.env.TWILIO_ACCOUNT_SID,
+    process.env.TWILIO_AUTH_TOKEN
+);
+
 /**
  * ✅ POST /api/auth/signup
- * Registers a new user + Sends Welcome SMS
+ * Registers user + sends welcome SMS
  */
 router.post("/signup", async (req, res) => {
     try {
@@ -37,7 +45,7 @@ router.post("/signup", async (req, res) => {
         // 📩 Send Welcome SMS
         try {
             await twilioClient.messages.create({
-                body: `🎉 Hi ${name}! Welcome to ChargeUp.\nYour signup was successful! ⚡🚗`,
+                body: `🎉 Hi ${name}! Welcome to ChargeUp.\nSignup successful! ⚡🚗`,
                 from: process.env.TWILIO_PHONE_NUMBER,
                 to: mobile,
             });
@@ -57,7 +65,7 @@ router.post("/signup", async (req, res) => {
 
 /**
  * ✅ POST /api/auth/login
- * Authenticates a user and returns a token
+ * Authenticates user
  */
 router.post("/login", async (req, res) => {
     try {
@@ -96,3 +104,4 @@ router.post("/login", async (req, res) => {
 });
 
 export default router;
+
