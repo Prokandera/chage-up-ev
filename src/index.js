@@ -18,7 +18,7 @@ app.post('/Auth.tsx',async (req, res) => {
     const result =await client.messages.create({
       body: 'hy welcome',
       from : process.env.TWILIO_PHONE_NUMBER,
-      to : to
+      to : mobile
     })
 
     res.status(200).json({
