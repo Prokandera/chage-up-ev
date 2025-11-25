@@ -260,4 +260,4 @@ export function BookingModal({
       </DialogContent>
     </Dialog>
   );
-} isme payment gateway integate karna h rasopay ka
+} 
