@@ -59,15 +59,18 @@ mongoose
     .then(() => console.log("✅ MongoDB Connected"))
     .catch((err) => console.error("❌ MongoDB Connection Error:", err));
 
+
 // ------------------------
-// ✅ Twilio Client
+// ✅ Twilio Client (Exported Globally)
 // ------------------------
-const client = twilio(
+export const twilioClient = twilio(
     process.env.TWILIO_ACCOUNT_SID,
     process.env.TWILIO_AUTH_TOKEN
 );
 
-// Example route - send SMS
+// ------------------------
+// Example SMS Route
+// ------------------------
 app.post("/api/send-sms", async (req, res) => {
     try {
         const { mobile } = req.body;
@@ -76,7 +79,7 @@ app.post("/api/send-sms", async (req, res) => {
             return res.status(400).json({ message: "Mobile number is required" });
         }
 
-        const response = await client.messages.create({
+        const response = await twilioClient.messages.create({
             body: "Hello from ChargeUp EV ⚡",
             from: process.env.TWILIO_PHONE_NUMBER,
             to: mobile
@@ -89,7 +92,7 @@ app.post("/api/send-sms", async (req, res) => {
 });
 
 // ------------------------
-// ✅ API Routes
+// API Routes
 // ------------------------
 app.use("/api/auth", authRoutes);
 app.use("/api/stations", stationRoutes);
@@ -99,11 +102,9 @@ app.use("/api/cancel-booking", cancelBookingRoute);
 // Home route
 app.get("/", (req, res) => res.send("⚡ Server running & connected!"));
 
-// ------------------------
-// Server Start
-// ------------------------
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>
     console.log(`🚀 Server running on http://localhost:${PORT}`)
 );
+
 
