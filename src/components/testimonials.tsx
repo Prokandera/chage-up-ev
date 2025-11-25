@@ -20,7 +20,7 @@ export function Testimonials() {
       quote: "The real-time availability feature is incredible. I've saved countless hours that I would have spent driving to unavailable stations.",
       author: "Sunny Kumar",
       role: "Full Stack Developer",
-      image: "",
+      image: "https://www.shutterstock.com/image-vector/ev-letter-power-logo-designev-260nw-1776820571.jpg",
     },
   ];
 
