@@ -8,9 +8,9 @@ export function HeroSection() {
   const [zipCode, setZipCode] = useState('');
 
   return (
-    <div className="relative overflow-hidden border border-gray-300 rounded-b-md p-4">
+    <div className="relative overflow-hidden">
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-ev-blue/10 via-ev-green/5 to-ev-indigo/10 z-0" />
+      <div className="absolute inset-0 bg-gradient-to-br from-ev-blue/10 via-ev-green/5 to-ev-indigo/10 z-0 border border-gray-300 rounded-b-md p-4" />
       
       <div className="relative max-w-7xl mx-auto pt-16 pb-24 px-4 sm:pt-24 sm:pb-32 sm:px-6 lg:px-8">
         <div className="lg:grid lg:grid-cols-12 lg:gap-8">
