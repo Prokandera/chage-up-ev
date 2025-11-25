@@ -2,15 +2,9 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { User } from "../models/User.js";
-import twilio from "twilio";
+import { twilioClient } from "../server.js";  // ✔ use same client from server.js
 
 const router = express.Router();
-
-// 📌 Twilio Client Setup
-const client = twilio(
-    process.env.TWILIO_ACCOUNT_SID,
-    process.env.TWILIO_AUTH_TOKEN
-);
 
 /**
  * ✅ POST /api/auth/signup
@@ -20,21 +14,17 @@ router.post("/signup", async (req, res) => {
     try {
         const { name, email, password, mobile } = req.body;
 
-        // Validate input
         if (!name || !email || !password || !mobile) {
             return res.status(400).json({ message: "All fields are required." });
         }
 
-        // Check if user already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ message: "User already exists." });
         }
 
-        // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Create new user
         const newUser = new User({
             name,
             email,
@@ -46,7 +36,7 @@ router.post("/signup", async (req, res) => {
 
         // 📩 Send Welcome SMS
         try {
-            await client.messages.create({
+            await twilioClient.messages.create({
                 body: `🎉 Hi ${name}! Welcome to ChargeUp.\nYour signup was successful! ⚡🚗`,
                 from: process.env.TWILIO_PHONE_NUMBER,
                 to: mobile,
@@ -65,7 +55,6 @@ router.post("/signup", async (req, res) => {
     }
 });
 
-
 /**
  * ✅ POST /api/auth/login
  * Authenticates a user and returns a token
@@ -74,24 +63,20 @@ router.post("/login", async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // Validate input
         if (!email || !password) {
             return res.status(400).json({ message: "Email and password are required." });
         }
 
-        // Find user
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(400).json({ message: "Invalid email or password." });
         }
 
-        // Check password
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(400).json({ message: "Invalid email or password." });
         }
 
-        // Generate JWT
         const token = jwt.sign(
             { id: user._id },
             process.env.JWT_SECRET,
@@ -111,4 +96,3 @@ router.post("/login", async (req, res) => {
 });
 
 export default router;
-
