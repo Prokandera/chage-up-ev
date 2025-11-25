@@ -70,7 +70,7 @@ export function HeroSection() {
               <div className="relative block w-full h-[400px] bg-gradient-to-r from-ev-green to-ev-blue rounded-lg overflow-hidden">
                 <img
                   className="w-full h-full object-cover mix-blend-overlay opacity-90 image-parallax"
-                  src="https://images.unsplash.com/photo-1593941707882-a5bba13107bc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1172&q=80"
+                  src="/Screenshot 2025-11-25 195957.png"
                   alt="Electric car charging"
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
