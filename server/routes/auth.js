@@ -9,7 +9,15 @@ const router = express.Router();
  * ✅ POST /api/auth/signup
  * Registers a new user
  */
-router.post("/signup", async(req, res) => {
+const twilio = require("twilio");
+
+// Twilio client setup
+const client = twilio(
+    process.env.TWILIO_ACCOUNT_SID,
+    process.env.TWILIO_AUTH_TOKEN
+);
+
+router.post("/signup", async (req, res) => {
     try {
         const { name, email, password, mobile } = req.body;
 
@@ -28,15 +36,33 @@ router.post("/signup", async(req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // 🧾 Create new user
-        const newUser = new User({ name, email, password: hashedPassword, mobile });
+        const newUser = new User({
+            name,
+            email,
+            password: hashedPassword,
+            mobile,
+        });
+
         await newUser.save();
 
-        res.status(201).json({ message: "User registered successfully!" });
+        // 📩 Send Welcome SMS with Twilio
+        await client.messages.create({
+            body: `🎉 Hi ${name}! Welcome to our platform.\nYour signup was successful. Enjoy the experience! 🚀`,
+            from: process.env.TWILIO_PHONE_NUMBER,
+            to: mobile,
+        });
+
+        // 🎉 Successful Signup Response
+        res.status(201).json({
+            message: "User registered successfully! SMS sent.",
+        });
+
     } catch (err) {
         console.error("❌ Signup error:", err.message);
         res.status(500).json({ error: "Server error during signup." });
     }
 });
+
 
 /**
  * ✅ POST /api/auth/login
