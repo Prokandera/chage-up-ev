@@ -65,6 +65,17 @@ app.use("/api/stations", stationRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/cancel-booking", cancelBookingRoute);
 
+// ------------------------
+// ✅ Tiwlio
+// ------------------------
+
+const twilio = require("twilio");
+
+const client = twilio(
+  process.env.TWILIO_ACCOUNT_SID,
+  process.env.TWILIO_AUTH_TOKEN
+);
+
 
 app.get("/", (req, res) => res.send("⚡ Server running & connected!"));
 
