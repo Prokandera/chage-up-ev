@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -34,7 +34,6 @@ export function BookingModal({
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // ✅ ALWAYS ensure connectorTypes has values
   const safeConnectorTypes =
     connectorTypes?.length > 0 ? connectorTypes : ["Type 2", "CCS", "CHAdeMO"];
 
@@ -70,7 +69,90 @@ export function BookingModal({
   const calculatePrice = () =>
     selectedConnector ? connectorPricing[selectedConnector] || 80 : 0;
 
-  const handleNext = async () => {
+  // ---------------------------
+  // 🚀 RAZORPAY PAYMENT FUNCTION
+  // ---------------------------
+  const initiatePayment = async (bookingData: any) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Please sign in to continue");
+      navigate("/auth?mode=login");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // 1️⃣ Create Payment Order from Backend
+      const orderRes = await fetch(`${API_BASE_URL}/create-payment-order`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          amount: bookingData.totalAmount * 100 // convert to paise
+        })
+      });
+
+      const orderData = await orderRes.json();
+      if (!orderRes.ok) throw new Error(orderData.error);
+
+      const options = {
+        key: "YOUR_RAZORPAY_KEY_ID", // ⚠️ Replace this
+        amount: orderData.amount,
+        currency: "INR",
+        name: "EV Charging Hub",
+        description: "Charging Slot Payment",
+        order_id: orderData.orderId,
+
+        handler: async (response: any) => {
+          try {
+            // 2️⃣ Save Final Booking After Payment Success
+            const saveRes = await fetch(`${API_BASE_URL}/bookings`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                ...bookingData,
+                paymentId: response.razorpay_payment_id,
+                orderId: response.razorpay_order_id,
+                signature: response.razorpay_signature,
+                paymentStatus: "paid"
+              }),
+            });
+
+            const saveData = await saveRes.json();
+            if (!saveRes.ok) throw new Error(saveData.error);
+
+            setBookingComplete(true);
+            toast.success("Payment Successful! Booking Confirmed.");
+          } catch (error: any) {
+            toast.error(error.message || "Error saving booking");
+          }
+        },
+
+        theme: {
+          color: "#0CC0DF",
+        },
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+
+    } catch (err: any) {
+      toast.error(err.message || "Payment failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ---------------------------
+  // NEXT BUTTON HANDLER
+  // ---------------------------
+  const handleNext = () => {
     if (step === 1 && !date) return toast.error("Please select a date.");
     if (step === 2 && !selectedConnector)
       return toast.error("Please select a connector type.");
@@ -78,14 +160,6 @@ export function BookingModal({
       return toast.error("Please select a time slot.");
 
     if (step === 3) {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        toast.error("Please sign in to complete booking");
-        navigate("/auth?mode=login");
-        handleClose();
-        return;
-      }
-
       const slotText =
         timeSlots.find((s) => s.id === selectedSlot)?.time || "";
 
@@ -98,33 +172,11 @@ export function BookingModal({
         totalAmount: calculatePrice(),
       };
 
-      console.log("📦 FINAL PAYLOAD:", bookingData);
-
-      try {
-        setLoading(true);
-
-        const res = await fetch(`${API_BASE_URL}/bookings`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(bookingData),
-        });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Booking failed");
-
-        setBookingComplete(true);
-        toast.success("Booking Confirmed!");
-      } catch (err: any) {
-        toast.error(err.message || "Booking failed");
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      setStep(step + 1);
+      initiatePayment(bookingData);
+      return;
     }
+
+    setStep(step + 1);
   };
 
   const handleClose = () => {
@@ -147,7 +199,6 @@ export function BookingModal({
               </DialogDescription>
             </DialogHeader>
 
-            {/* STEP 1 */}
             {step === 1 && (
               <div className="py-4">
                 <h4 className="text-sm font-medium mb-3">Select Date</h4>
@@ -163,7 +214,6 @@ export function BookingModal({
               </div>
             )}
 
-            {/* STEP 2 */}
             {step === 2 && (
               <div className="space-y-4 py-4">
                 <h4 className="text-sm font-medium mb-2">Choose Connector</h4>
@@ -188,7 +238,6 @@ export function BookingModal({
               </div>
             )}
 
-            {/* STEP 3 */}
             {step === 3 && (
               <div className="space-y-4 py-4">
                 <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
@@ -236,7 +285,7 @@ export function BookingModal({
                 {loading
                   ? "Processing..."
                   : step === 3
-                  ? "Complete Booking"
+                  ? "Pay & Confirm"
                   : "Next"}
               </Button>
             </DialogFooter>
