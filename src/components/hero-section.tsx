@@ -70,8 +70,7 @@ export function HeroSection() {
               <div className="relative block w-full h-[400px] bg-gradient-to-r from-ev-green to-ev-blue rounded-lg overflow-hidden">
                 <img
                   className="w-full h-full object-cover mix-blend-overlay opacity-90 image-parallax"
-                  src="https://imgs.search.brave.com/eUA-Z1B4I7bAskTOO19UXdCDl9kuMyAy52hxCkZsA74/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zdGF0/aWMudmVjdGVlenku/Y29tL3N5c3RlbS9y/ZXNvdXJjZXMvdGh1/bWJuYWlscy8wMjIv/NTA2LzYxOS9zbWFs/bC9lbGVjdHJpYy1j/YXItY2hhcmdpbmct/aW4tdW5kZXJncm91/bmQtZ2FyYWdlLXBs/dWdnZWQtYXQtaG9t/ZS1jaGFyZ2VyLXN0/YXRpb24tYmF0dGVy/eS1ldi12ZWhpY2xl/LXN0YW5kaW5nLXBh/cmtpbmctZnJlZS1w/aG90by5qcGc
-                  "
+                  src="/electric-car-charging-in-underground-garage-plugged-at-home-charger-station-battery-ev-vehicle-standing-parking-free-photo.webp"
                   alt="Electric car charging"
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
