@@ -88,13 +88,14 @@ const About = () => {
                   role: 'Co-Founder & CEO',
                 },
                 {
+                  name: 'Sunny Kumar',
+                  role: 'Founder',
+                },
+                {
                   name: 'Shashank Tyagi',
                   role: 'Co-Founder & CTO',
                 },
-                {
-                  name: 'Sunny Kumar',
-                  role: 'COO',
-                },
+                
               ].map((person) => (
                 <div key={person.name} className="flex flex-col items-center">
                   <h3 className="mt-6 text-lg font-semibold leading-8 tracking-tight text-gray-900">{person.name}</h3>
