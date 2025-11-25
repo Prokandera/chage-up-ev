@@ -20,7 +20,7 @@ export function Testimonials() {
       quote: "The real-time availability feature is incredible. I've saved countless hours that I would have spent driving to unavailable stations.",
       author: "Sunny Kumar",
       role: "Full Stack Developer",
-      image: "https://drive.google.com/file/d/17SrBpHmKAb1c25Fshh2MlnoBw912TV2Q/view?usp=sharing",
+      image: "https://github.com/Prokandera/chage-up-ev/blob/main/public/IMG_20251010_113146_340.webp",
     },
   ];
 
