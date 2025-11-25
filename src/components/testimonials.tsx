@@ -13,7 +13,7 @@ export function Testimonials() {
       quote: "As someone who travels frequently for work, this app has been a game-changer. Booking charging slots in advance gives me peace of mind.",
       author: "Shashank Tyagi",
       role: "API Engineer",
-      image: "",
+      image: "/WhatsApp Image 2025-11-25 at 23.09.15_ea121b0d.jpg",
     },
     {
       id: 3,
