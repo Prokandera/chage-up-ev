@@ -3,12 +3,13 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
 
+// Routes
 import authRoutes from "./routes/auth.js";
 import stationRoutes from "./routes/stations.js";
 import bookingRoutes from "./routes/bookings.js";
 import cancelBookingRoute from "./routes/cancelBooking.js";
 
-// Twilio ES Module import
+// Twilio
 import twilio from "twilio";
 
 dotenv.config();
@@ -16,12 +17,12 @@ dotenv.config();
 const app = express();
 
 // ------------------------
-// ✅ ABSOLUTE CORS FIX
+// ✅ CORS FIX
 // ------------------------
 const allowedOrigins = [
     "https://chage-up-ev.vercel.app",
     "http://localhost:5173",
-    "http://localhost:3000"
+    "http://localhost:3000",
 ];
 
 const isVercelPreview = (origin) =>
@@ -57,11 +58,10 @@ app.use(express.json());
 mongoose
     .connect(process.env.MONGO_URI)
     .then(() => console.log("✅ MongoDB Connected"))
-    .catch((err) => console.error("❌ MongoDB Connection Error:", err));
-
+    .catch((err) => console.error("❌ MongoDB Error:", err));
 
 // ------------------------
-// ✅ Twilio Client (Exported Globally)
+// ✅ Twilio Client (GLOBAL)
 // ------------------------
 export const twilioClient = twilio(
     process.env.TWILIO_ACCOUNT_SID,
@@ -69,7 +69,7 @@ export const twilioClient = twilio(
 );
 
 // ------------------------
-// Example SMS Route
+// Test SMS Route
 // ------------------------
 app.post("/api/send-sms", async (req, res) => {
     try {
@@ -79,13 +79,13 @@ app.post("/api/send-sms", async (req, res) => {
             return res.status(400).json({ message: "Mobile number is required" });
         }
 
-        const response = await twilioClient.messages.create({
+        const sms = await twilioClient.messages.create({
             body: "Hello from ChargeUp EV ⚡",
             from: process.env.TWILIO_PHONE_NUMBER,
-            to: mobile
+            to: mobile,
         });
 
-        res.json({ message: "SMS sent!", sid: response.sid });
+        res.json({ message: "SMS sent", sid: sms.sid });
     } catch (error) {
         res.status(500).json({ message: "SMS failed", error: error.message });
     }
@@ -100,11 +100,15 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/cancel-booking", cancelBookingRoute);
 
 // Home route
-app.get("/", (req, res) => res.send("⚡ Server running & connected!"));
+app.get("/", (req, res) => res.send("⚡ Server running successfully!"));
 
+// ------------------------
+// Start Server
+// ------------------------
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>
-    console.log(`🚀 Server running on http://localhost:${PORT}`)
+    console.log(`🚀 Server running at http://localhost:${PORT}`)
 );
+
 
 
