@@ -13,12 +13,10 @@ const accountSid = process.env.TWILIO_ACCOUNT_SID
 const authTokin = process.env.TWILIO_AUTH_TOKIN
 const client = new twilio(accountSid, authTokin)
 
-app.post('/send-sms',async (req, res) => {
-  const {to, message} = req.body
-
+app.post('/Auth.tsx',async (req, res) => {
   try{
     const result =await client.messages.create({
-      body: message,
+      body: 'hy welcome',
       from : process.env.TWILIO_PHONE_NUMBER,
       to : to
     })
