@@ -2,12 +2,14 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
+
 import authRoutes from "./routes/auth.js";
 import stationRoutes from "./routes/stations.js";
 import bookingRoutes from "./routes/bookings.js";
-import authenticateToken from "./middleware/authmiddleware.js";
 import cancelBookingRoute from "./routes/cancelBooking.js";
 
+// Twilio ES Module import
+import twilio from "twilio";
 
 dotenv.config();
 
@@ -17,9 +19,9 @@ const app = express();
 // ✅ ABSOLUTE CORS FIX
 // ------------------------
 const allowedOrigins = [
-    "https://chage-up-ev.vercel.app", // your deployed frontend
-    "http://localhost:5173", // vite dev
-    "http://localhost:3000", // react dev
+    "https://chage-up-ev.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:3000"
 ];
 
 const isVercelPreview = (origin) =>
@@ -46,11 +48,11 @@ app.use((req, res, next) => {
     next();
 });
 
-// parse json
+// parse JSON
 app.use(express.json());
 
 // ------------------------
-// ✅ MongoDB connect
+// ✅ MongoDB Connection
 // ------------------------
 mongoose
     .connect(process.env.MONGO_URI)
@@ -58,27 +60,50 @@ mongoose
     .catch((err) => console.error("❌ MongoDB Connection Error:", err));
 
 // ------------------------
-// ✅ Routes
+// ✅ Twilio Client
+// ------------------------
+const client = twilio(
+    process.env.TWILIO_ACCOUNT_SID,
+    process.env.TWILIO_AUTH_TOKEN
+);
+
+// Example route - send SMS
+app.post("/api/send-sms", async (req, res) => {
+    try {
+        const { mobile } = req.body;
+
+        if (!mobile) {
+            return res.status(400).json({ message: "Mobile number is required" });
+        }
+
+        const response = await client.messages.create({
+            body: "Hello from ChargeUp EV ⚡",
+            from: process.env.TWILIO_PHONE_NUMBER,
+            to: mobile
+        });
+
+        res.json({ message: "SMS sent!", sid: response.sid });
+    } catch (error) {
+        res.status(500).json({ message: "SMS failed", error: error.message });
+    }
+});
+
+// ------------------------
+// ✅ API Routes
 // ------------------------
 app.use("/api/auth", authRoutes);
 app.use("/api/stations", stationRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/cancel-booking", cancelBookingRoute);
 
-// ------------------------
-// ✅ Tiwlio
-// ------------------------
-
-const twilio = require("twilio");
-
-const client = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
-
-
+// Home route
 app.get("/", (req, res) => res.send("⚡ Server running & connected!"));
 
 // ------------------------
+// Server Start
+// ------------------------
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+app.listen(PORT, () =>
+    console.log(`🚀 Server running on http://localhost:${PORT}`)
+);
+
