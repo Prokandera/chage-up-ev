@@ -6,7 +6,7 @@ export function Testimonials() {
       quote: "ElectricChargeHub has completely transformed how I plan my trips. I never worry about finding a charging station anymore.",
       author: "Abhishek Kandera",
       role: "Full Stack Developer",
-      image: "",
+      image: "/1764014536891.png",
     },
     {
       id: 2,
