@@ -9,14 +9,6 @@ const router = express.Router();
  * ✅ POST /api/auth/signup
  * Registers a new user
  */
-const twilio = require("twilio");
-
-// Twilio client setup
-const client = twilio(
-    process.env.TWILIO_ACCOUNT_SID,
-    process.env.TWILIO_AUTH_TOKEN
-);
-
 router.post("/signup", async (req, res) => {
     try {
         const { name, email, password, mobile } = req.body;
