@@ -94,7 +94,7 @@ router.post("/signup", async (req, res) => {
 });
 
 /* ------------------------------------
-   ✅ LOGIN ROUTE
+   ✅ LOGIN ROUTE + EMAIL ON LOGIN
 ------------------------------------ */
 router.post("/login", async (req, res) => {
     try {
@@ -120,8 +120,22 @@ router.post("/login", async (req, res) => {
             { expiresIn: "1d" }
         );
 
+        /* ---------------------
+           📩 SEND LOGIN EMAIL
+        ---------------------- */
+        try {
+            await emailTransport.sendMail({
+                from: "admin@evchargeup.com",
+                to: email,
+                subject: "Login Successful ✔",
+                text: `Hi ${user.name}, you have successfully logged in to ChargeUp! ⚡`,
+            });
+        } catch (emailErr) {
+            console.error("Login Email Error:", emailErr.message);
+        }
+
         res.status(200).json({
-            message: "Login successful",
+            message: "Login successful! Email sent.",
             token,
             user: { id: user._id, name: user.name, email: user.email },
         });
