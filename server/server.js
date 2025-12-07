@@ -2,6 +2,8 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
+import mailTestRoute from "./routes/mailTest.js";
+
 
 // Routes
 import authRoutes from "./routes/auth.js";
@@ -98,6 +100,9 @@ app.use("/api/auth", authRoutes);
 app.use("/api/stations", stationRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/cancel-booking", cancelBookingRoute);
+
+//  ADD THIS ROUTE
+app.use("/api", mailTestRoute);
 
 // Home route
 app.get("/", (req, res) => res.send("⚡ Server running successfully!"));

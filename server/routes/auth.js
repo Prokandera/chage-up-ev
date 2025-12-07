@@ -3,21 +3,35 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { User } from "../models/User.js";
 import twilio from "twilio";
+import nodemailer from "nodemailer";
+import dotenv from "dotenv";
+dotenv.config();
 
 const router = express.Router();
 
-// -----------------------------
-// ✅ Twilio Client (LOCAL)
-// -----------------------------
+/* ------------------------------------
+   📩 Mailtrap Email Transport
+------------------------------------ */
+const emailTransport = nodemailer.createTransport({
+    host: process.env.MAILTRAP_HOST,
+    port: process.env.MAILTRAP_PORT,
+    auth: {
+        user: process.env.MAILTRAP_USER,
+        pass: process.env.MAILTRAP_PASS,
+    },
+});
+
+/* ------------------------------------
+   📱 Twilio Client
+------------------------------------ */
 const twilioClient = twilio(
     process.env.TWILIO_ACCOUNT_SID,
     process.env.TWILIO_AUTH_TOKEN
 );
 
-/**
- * ✅ POST /api/auth/signup
- * Registers user + sends welcome SMS
- */
+/* ------------------------------------
+   ✅ SIGNUP ROUTE (SMS + EMAIL both)
+------------------------------------ */
 router.post("/signup", async (req, res) => {
     try {
         const { name, email, password, mobile } = req.body;
@@ -42,7 +56,23 @@ router.post("/signup", async (req, res) => {
 
         await newUser.save();
 
-        // 📩 Send Welcome SMS
+        /* ---------------------
+           📩 SEND WELCOME EMAIL
+        ---------------------- */
+        try {
+            await emailTransport.sendMail({
+                from: "admin@evchargeup.com",
+                to: email,
+                subject: "Welcome to ChargeUp ⚡",
+                text: `Hi ${name}, your account has been successfully created! 🚀`,
+            });
+        } catch (emailErr) {
+            console.error("Email Error:", emailErr.message);
+        }
+
+        /* ---------------------
+           📱 SEND SMS
+        ---------------------- */
         try {
             await twilioClient.messages.create({
                 body: `🎉 Hi ${name}! Welcome to ChargeUp.\nSignup successful! ⚡🚗`,
@@ -54,7 +84,7 @@ router.post("/signup", async (req, res) => {
         }
 
         res.status(201).json({
-            message: "User registered successfully! SMS sent.",
+            message: "User registered successfully! Email + SMS sent.",
         });
 
     } catch (err) {
@@ -63,10 +93,9 @@ router.post("/signup", async (req, res) => {
     }
 });
 
-/**
- * ✅ POST /api/auth/login
- * Authenticates user
- */
+/* ------------------------------------
+   ✅ LOGIN ROUTE
+------------------------------------ */
 router.post("/login", async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -104,4 +133,3 @@ router.post("/login", async (req, res) => {
 });
 
 export default router;
-
