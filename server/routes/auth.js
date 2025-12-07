@@ -120,6 +120,18 @@ router.post("/login", async (req, res) => {
             { expiresIn: "1d" }
         );
 
+        // 📱 SEND LOGIN SMS
+
+        try {
+    await twilioClient.messages.create({
+        body: `🔐 Login Alert!\nHi ${user.name}, you have successfully logged in to ChargeUp.`,
+        from: process.env.TWILIO_PHONE_NUMBER,
+        to: user.mobile,
+    });
+} catch (smsError) {
+    console.error("SMS Error:", smsError.message);
+}
+            
         /* ---------------------
            📩 SEND LOGIN EMAIL
         ---------------------- */
