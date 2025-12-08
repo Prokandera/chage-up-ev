@@ -67,7 +67,7 @@ const About = () => {
               </div>
               <div className="rounded-xl bg-muted/30 p-2 ring-1 ring-inset ring-border lg:flex lg:flex-col lg:justify-center animate-slide-in-right hover-lift">
                 <img
-                  src="https://images.unsplash.com/photo-1638887232075-33691d8de7d7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
+                  src="/about-us-e1692957507489.png"
                   alt="Team working on electric vehicle charging solutions"
                   className="w-full rounded-md shadow-2xl image-parallax"
                 />
@@ -88,13 +88,14 @@ const About = () => {
                   role: 'Co-Founder & CEO',
                 },
                 {
+                  name: 'Sunny Kumar',
+                  role: 'Founder',
+                },
+                {
                   name: 'Shashank Tyagi',
                   role: 'Co-Founder & CTO',
                 },
-                {
-                  name: 'Sunny Kumar',
-                  role: 'COO',
-                },
+                
               ].map((person) => (
                 <div key={person.name} className="flex flex-col items-center">
                   <h3 className="mt-6 text-lg font-semibold leading-8 tracking-tight text-gray-900">{person.name}</h3>

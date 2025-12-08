@@ -10,7 +10,7 @@ export function HeroSection() {
   return (
     <div className="relative overflow-hidden">
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-ev-blue/10 via-ev-green/5 to-ev-indigo/10 z-0" />
+      <div className="absolute inset-0 bg-gradient-to-br from-ev-blue/10 via-ev-green/5 to-ev-indigo/10 z-0 border border-gray-300 rounded-b-md p-4" />
       
       <div className="relative max-w-7xl mx-auto pt-16 pb-24 px-4 sm:pt-24 sm:pb-32 sm:px-6 lg:px-8">
         <div className="lg:grid lg:grid-cols-12 lg:gap-8">
@@ -70,7 +70,7 @@ export function HeroSection() {
               <div className="relative block w-full h-[400px] bg-gradient-to-r from-ev-green to-ev-blue rounded-lg overflow-hidden">
                 <img
                   className="w-full h-full object-cover mix-blend-overlay opacity-90 image-parallax"
-                  src="https://images.unsplash.com/photo-1593941707882-a5bba13107bc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1172&q=80"
+                  src="/electric-car-charging-in-underground-garage-plugged-at-home-charger-station-battery-ev-vehicle-standing-parking-free-photo.webp"
                   alt="Electric car charging"
                 />
                 <div className="absolute inset-0 flex items-center justify-center">

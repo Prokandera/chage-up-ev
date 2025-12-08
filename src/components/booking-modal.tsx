@@ -260,4 +260,4 @@ export function BookingModal({
       </DialogContent>
     </Dialog>
   );
-}
+} 
